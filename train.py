@@ -132,7 +132,7 @@ def main(server, log_dir, context):
     images_for_tensorboard = Gz
     tf.summary.image('Generated_images', images_for_tensorboard, 10)
     merged = tf.summary.merge_all()
-    logdir = log_dir + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "/"
+    logdir = log_dir + "/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "/"
 
     tvars = tf.trainable_variables()
 
@@ -140,11 +140,11 @@ def main(server, log_dir, context):
     g_vars = [var for var in tvars if 'g_' in var.name]
 
     # Discriminator training operations
-    d_trainer_fake = tf.train.AdamOptimizer(0.001).minimize(d_loss_fake, var_list=d_vars)
-    d_trainer_real = tf.train.AdamOptimizer(0.001).minimize(d_loss_real, var_list=d_vars)
+    d_trainer_fake = tf.train.AdamOptimizer(0.001, beta1=0.5).minimize(d_loss_fake, var_list=d_vars)
+    d_trainer_real = tf.train.AdamOptimizer(0.001, beta1=0.5).minimize(d_loss_real, var_list=d_vars)
 
     # Generator training operations
-    g_trainer = tf.train.AdamOptimizer(0.004).minimize(g_loss, var_list=g_vars)
+    g_trainer = tf.train.AdamOptimizer(0.004, beta1=0.5).minimize(g_loss, var_list=g_vars)
 
     is_chief = server.server_def.task_index == 0
     with tf.train.MonitoredTrainingSession(master=server.target,
