@@ -129,7 +129,7 @@ def main(server, log_dir, context):
     tf.summary.scalar('d_fake_count', d_fake_count_ph)
     tf.summary.scalar('g_count', g_count_ph)
 
-    images_for_tensorboard = generator(batch_size, z_dimensions)
+    images_for_tensorboard = Gz
     tf.summary.image('Generated_images', images_for_tensorboard, 10)
     merged = tf.summary.merge_all()
     logdir = log_dir + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "/"
