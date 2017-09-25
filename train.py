@@ -109,7 +109,7 @@ def main(server, log_dir, context):
     # Dx will hold discriminator prediction probabilities
     # for the real MNIST images
 
-    Dg = discriminator(Gz, reuse=True)
+    Dg = discriminator(Gz)
     # Dg will hold discriminator prediction probabilities for generated images
 
     # == LOSSES AND OPTIMIZERS ==
@@ -141,15 +141,13 @@ def main(server, log_dir, context):
     d_vars = [var for var in tvars if 'd_' in var.name]
     g_vars = [var for var in tvars if 'g_' in var.name]
 
-    with tf.variable_scope(tf.get_variable_scope(), reuse=False) as scope:
+    with tf.variable_scope(tf.get_variable_scope(), reuse=None) as scope:
         # Discriminator training operations
         d_trainer_fake = tf.train.AdamOptimizer(0.001).minimize(d_loss_fake, var_list=d_vars)
         d_trainer_real = tf.train.AdamOptimizer(0.001).minimize(d_loss_real, var_list=d_vars)
 
         # Generator training operations
         g_trainer = tf.train.AdamOptimizer(0.004).minimize(g_loss, var_list=g_vars)
-
-    saver = tf.train.Saver(write_version=tf.train.SaverDef.V1)
 
     is_chief = server.server_def.task_index == 0
     with tf.train.MonitoredTrainingSession(master=server.target,
