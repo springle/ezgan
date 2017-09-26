@@ -143,12 +143,17 @@ def main(server, log_dir, context):
     d_vars = [var for var in tvars if 'd_' in var.name]
     g_vars = [var for var in tvars if 'g_' in var.name]
 
+    global_step = tf.Variable(0, name='global_step', trainable=False)
+
     # Discriminator training operations
-    d_trainer_fake = tf.train.AdamOptimizer(d_fake_learning_rate, beta1=beta1).minimize(d_loss_fake, var_list=d_vars)
-    d_trainer_real = tf.train.AdamOptimizer(d_real_learning_rate, beta1=beta1).minimize(d_loss_real, var_list=d_vars)
+    d_trainer_fake = tf.train.AdamOptimizer(d_fake_learning_rate, beta1=beta1).minimize(
+        d_loss_fake, var_list=d_vars, global_step=global_step)
+    d_trainer_real = tf.train.AdamOptimizer(d_real_learning_rate, beta1=beta1).minimize(
+        d_loss_real, var_list=d_vars, global_step=global_step)
 
     # Generator training operations
-    g_trainer = tf.train.AdamOptimizer(g_learning_rate, beta1=beta1).minimize(g_loss, var_list=g_vars)
+    g_trainer = tf.train.AdamOptimizer(g_learning_rate, beta1=beta1).minimize(
+        g_loss, var_list=g_vars, global_step=global_step)
 
     is_chief = server.server_def.task_index == 0
     with tf.train.MonitoredTrainingSession(master=server.target,
