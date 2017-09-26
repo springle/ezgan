@@ -94,8 +94,12 @@ def generator(batch_size, z_dim):
 
 def main(server, log_dir, context):
 
-    batch_size = 50
-    z_dimensions = 100
+    batch_size = context.get("batch_size") or 50
+    z_dimensions = context.get("z_dimensions") or 100
+    g_learning_rate = context.get("g_learning_rate") or 0.004
+    d_fake_learning_rate = context.get("g_learning_rate") or 0.001
+    d_real_learning_rate = context.get("g_learning_rate") or 0.001
+    beta1 = context.get("beta1") or 0.8
 
     x_placeholder = tf.placeholder("float", shape=[None, 28, 28, 1], name='x_placeholder')
     # x_placeholder is for feeding input images to the discriminator
@@ -140,11 +144,11 @@ def main(server, log_dir, context):
     g_vars = [var for var in tvars if 'g_' in var.name]
 
     # Discriminator training operations
-    d_trainer_fake = tf.train.AdamOptimizer(0.001, beta1=0.5).minimize(d_loss_fake, var_list=d_vars)
-    d_trainer_real = tf.train.AdamOptimizer(0.001, beta1=0.5).minimize(d_loss_real, var_list=d_vars)
+    d_trainer_fake = tf.train.AdamOptimizer(d_fake_learning_rate, beta1=beta1).minimize(d_loss_fake, var_list=d_vars)
+    d_trainer_real = tf.train.AdamOptimizer(d_real_learning_rate, beta1=beta1).minimize(d_loss_real, var_list=d_vars)
 
     # Generator training operations
-    g_trainer = tf.train.AdamOptimizer(0.004, beta1=0.5).minimize(g_loss, var_list=g_vars)
+    g_trainer = tf.train.AdamOptimizer(g_learning_rate, beta1=beta1).minimize(g_loss, var_list=g_vars)
 
     is_chief = server.server_def.task_index == 0
     with tf.train.MonitoredTrainingSession(master=server.target,
