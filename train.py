@@ -188,9 +188,11 @@ def main(server, log_dir, context):
                                                           {x_placeholder: real_image_batch})
                 d_real_count += 1
 
-            if is_chief and (i % 10 == 0):
+            gstep = tf.train.global_step(sess, global_step)
+
+            if is_chief and (i % 50 == 0):
                 real_image_batch = mnist.validation.next_batch(batch_size)[0].reshape([batch_size, 28, 28, 1])
                 summary = sess.run(merged, {x_placeholder: real_image_batch, d_real_count_ph: d_real_count,
                                             d_fake_count_ph: d_fake_count, g_count_ph: g_count})
-                writer.add_summary(summary, i)
+                writer.add_summary(summary, gstep)
                 d_real_count, d_fake_count, g_count = 0, 0, 0
